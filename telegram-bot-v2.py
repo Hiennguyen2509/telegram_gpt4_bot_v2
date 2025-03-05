@@ -43,23 +43,24 @@ def analyze_trade_image(image_url):
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
     prompt = """
-Bạn là một chuyên gia tài chính. Tôi sẽ cung cấp một hình ảnh chứa thông tin giao dịch forex. 
+Bạn là một chuyên gia tài chính. Tôi sẽ cung cấp một hình ảnh chứa thông tin giao dịch forex.  
 Hãy phân tích dữ liệu trong ảnh và kiểm tra xem có đáp ứng các tiêu chí sau không:
 
-1️⃣ **Thời gian mở lệnh của hai tài khoản phải có sai số không quá 10 giây.**  
-2️⃣ **Thời gian đóng lệnh của hai tài khoản phải có sai số không quá 10 giây.**  
+### 📌 Tiêu chí kiểm tra:
+1️⃣ **Thời gian mở lệnh của hai tài khoản phải có sai số trong khoảng từ 0 đến 10 giây.**  
+2️⃣ **Thời gian đóng lệnh của hai tài khoản phải có sai số trong khoảng từ 0 đến 10 giây.**  
 
-📌 **Cách kiểm tra:**  
-- Nếu **sai số ≤ 10 giây**, giao dịch hợp lệ. **Không được báo lỗi trong trường hợp này.**  
-- Nếu **sai số > 10 giây**, giao dịch không hợp lệ và cần báo lỗi.  
+### 🔹 Quy tắc đánh giá:
+✅ **Giao dịch hợp lệ nếu sai số nằm trong khoảng từ 0 đến 10 giây (bao gồm cả 0 và 10).**  
+❌ **Giao dịch không hợp lệ nếu sai số lớn hơn 10 giây.**  
 
-🔹 **Cách trả về kết quả:**  
-- Nếu giao dịch hợp lệ (**sai số ≤ 10 giây**), **chỉ trả về đúng ký hiệu** `✅`. **Không được giải thích thêm.**  
-- Nếu giao dịch không hợp lệ (**sai số > 10 giây**), trả về `❌` kèm theo lý do và số giây sai lệch.  
+### 🔹 Cách trả về kết quả:
+- Nếu giao dịch hợp lệ (**sai số từ 0 đến 10 giây**), **chỉ trả về ký hiệu** `✅`. **Không được giải thích thêm.**  
+- Nếu giao dịch không hợp lệ (**sai số > 10 giây**), trả về `❌` kèm theo số giây sai lệch và thông báo giao dịch không hợp lệ.  
 
-📢 **Lưu ý quan trọng:**  
-❌ **Không báo lỗi nếu sai số nhỏ hơn hoặc bằng 10 giây.** GPT **chỉ báo lỗi nếu sai số lớn hơn 10 giây.**  
-✅ **Nếu hợp lệ, trả về đúng `✅` mà không có bất kỳ văn bản nào khác.**
+### 📢 Lưu ý quan trọng:
+- **Nếu sai số là 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 giây**, giao dịch vẫn hợp lệ và chỉ trả về `✅`, **không báo lỗi trong bất kỳ trường hợp nào**.   
+- **Nếu sai số lớn hơn 10 giây**, GPT phải báo lỗi với ký hiệu `❌` và số giây sai lệch.  
 """
 
     response = client.chat.completions.create(
